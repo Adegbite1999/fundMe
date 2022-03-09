@@ -59,12 +59,11 @@ contract CrowdFunding {
     }
 
     // require that only initiatot can withdraw
-    function withdraw(uint _index, address payable eoa) onlyInitiator payable external{
+    function withdraw(uint _index) onlyInitiator payable external{
         Fund storage f = funds[_index];
         require(block.timestamp >= f.timer, "mature time never reach");
-        eoa.transfer(f.contributedAmt);
+        initiator.transfer(f.contributedAmt);
         f.contributedAmt = 0;
-        // f.isActive = false;
     }
 
 
