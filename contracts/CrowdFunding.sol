@@ -6,32 +6,31 @@ import "hardhat/console.sol";
 // V1
 // V2 would implement a multisig.
 contract CrowdFunding {
-    address payable initiator;
+
+        // A fundme `aid` contract:
+    // where a person can intiate a fund me , specify address, target amount,  time.
+    // other people can then come and contribute , and once the targetAmount has been reached the goFund ends and funds are transferred to the initiator account
+    // scenario: Alice needs helps with her business , she can come to the smart contract, initiate a gofund me and set a timer 
+    // Bob and any other person can contribute to her course and once her target has been reached the contract locks and the funds are transferred to the intitiator account(alice)
     struct Fund {
+        address initiator;
         uint256 target;
         uint256 timer;
         mapping(address => uint) contribution; 
         uint contributedAmt;
         bool isActive;
     }
-
-    constructor(){
-        initiator = payable(msg.sender);
-    }
-
-    modifier onlyInitiator(){
-        require(initiator == msg.sender ,"Only initiator can withdraw");
-        _;
-    }
+ 
 
 
     mapping(uint256 => Fund) public funds;
     uint256 indexToFund = 0;
 
-    function initiateHelp(uint _target, uint timer) external {
+    function initiateHelp(uint _target, uint timer)  external {
         Fund storage f = funds[indexToFund];
+        f.initiator = msg.sender;
         f.target = _target;
-        f.timer = block.timestamp+timer;
+        f.timer = block.timestamp + timer;
         f.isActive = true;
         indexToFund +=1;
     }
@@ -59,10 +58,11 @@ contract CrowdFunding {
     }
 
     // require that only initiatot can withdraw
-    function withdraw(uint _index) onlyInitiator payable external{
+    function withdraw(uint _index)  payable external{
         Fund storage f = funds[_index];
         require(block.timestamp >= f.timer, "mature time never reach");
-        initiator.transfer(f.contributedAmt);
+        require(f.initiator == msg.sender, "Only initiator can withdraw");
+        payable(f.initiator).transfer(f.contributedAmt);
         f.contributedAmt = 0;
     }
 

@@ -8,8 +8,8 @@ import { ethers } from "hardhat";
 async function main() {
   const CrowdFund = await ethers.getContractFactory("CrowdFunding");
   const crowdfund = await CrowdFund.deploy();
-
   await crowdfund.deployed()
+  
 
 
 }
